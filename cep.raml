@@ -1,0 +1,16 @@
+#%RAML 1.0
+title: cep
+
+/cep:
+  get:
+    displayName: 
+    queryParameters:
+      cep:
+        type: string
+        example: "05001200"
+    responses:
+      200:
+        body:
+          application/json:
+            type: array
+      
