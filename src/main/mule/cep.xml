@@ -3,7 +3,7 @@
     <http:listener-config name="cep-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:1.0.0:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:1.0.1:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="28cec497-7eaa-4a75-ab11-ed513e86f169" >
 		<http:request-connection host="viacep.com.br" />
 	</http:request-config>
