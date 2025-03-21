@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>f620cd3f-ecbe-4243-8cc4-5987fce06501</groupId>
 			<artifactId>cep</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.7</version>
 			<classifier>raml</classifier>
 			<type>zip</type>
 		</dependency>

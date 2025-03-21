@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
     <http:listener-config name="cep-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8081" />
+        <http:listener-connection host="0.0.0.0" port="8081">
+        </http:listener-connection>
     </http:listener-config>
-    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:1.0.1:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="28cec497-7eaa-4a75-ab11-ed513e86f169" >
-		<http:request-connection host="viacep.com.br" />
-	</http:request-config>
+    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:1.0.7:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" keepApiBaseUri="true"/>
+    <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="28cec497-7eaa-4a75-ab11-ed513e86f169">
+        <http:request-connection host="viacep.com.br" />
+    </http:request-config>
 	<flow name="cep-main">
         <http:listener config-ref="cep-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -127,14 +129,21 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\cep:cep-config">
-    	<logger level="INFO" message="get:\cep:cep-config" />
-    	<set-variable variableName="cep" value="#[attributes.queryParams.cep]" />
+        <http:listener config-ref="cep-httpListenerConfig" path="/cep/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable variableName="cep" value="#[attributes.queryParams.cep]" />
         <logger level="INFO" message="CEP Consultado: #[vars.cep]" />
-		<http:request method="GET" doc:name="Request" doc:id="fa0536cb-83fc-430f-ab7c-2b778f63865b" config-ref="HTTP_Request_configuration" url="#['http://viacep.com.br/ws/' ++ vars.cep ++ '/json']">
-        </http:request>
-		<ee:transform doc:name="Transform Message" doc:id="d30cb99c-5e46-41e7-a89b-93ed21aea67f" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+        <http:request method="GET" doc:name="Request" doc:id="fa0536cb-83fc-430f-ab7c-2b778f63865b" config-ref="HTTP_Request_configuration" url="#['http://viacep.com.br/ws/' ++ vars.cep ++ '/json']" />
+        <ee:transform doc:name="Transform Message" doc:id="d30cb99c-5e46-41e7-a89b-93ed21aea67f">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
@@ -148,7 +157,7 @@ output application/json
   regiao: payload.regiao,
   ddd: payload.ddd
 }]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
+            </ee:message>
+        </ee:transform>
     </flow>
 </mule>
