@@ -29,6 +29,14 @@
 				<artifactId>mule-maven-plugin</artifactId>
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
+				<configuration>
+					<sharedLibraries>
+						<sharedLibrary>
+							<groupId>org.postgresql</groupId>
+							<artifactId>postgresql</artifactId>
+						</sharedLibrary>
+					</sharedLibraries>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
@@ -55,15 +63,44 @@
 		<dependency>
 			<groupId>org.mule.connectors</groupId>
 			<artifactId>mule-db-connector</artifactId>
-			<version>1.14.13</version>
+			<version>1.14.14</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mule.connectors</groupId>
+			<artifactId>mule-vm-connector</artifactId>
+			<version>2.0.1</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.connectors</groupId>
+			<artifactId>mule-salesforce-connector</artifactId>
+			<version>10.22.4</version>
+			<classifier>mule-plugin</classifier>
+		</dependency>
+		<dependency>
+			<groupId>com.mulesoft.connectors</groupId>
+			<artifactId>mule-workday-connector</artifactId>
+			<version>16.2.1</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
 			<groupId>f620cd3f-ecbe-4243-8cc4-5987fce06501</groupId>
 			<artifactId>cep</artifactId>
-			<version>1.0.7</version>
+			<version>1.0.8</version>
 			<classifier>raml</classifier>
 			<type>zip</type>
+		</dependency>
+		<dependency>
+			<groupId>f620cd3f-ecbe-4243-8cc4-5987fce06501</groupId>
+			<artifactId>mule-plugin-cep</artifactId>
+			<version>1.0.8</version>
+			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>
 

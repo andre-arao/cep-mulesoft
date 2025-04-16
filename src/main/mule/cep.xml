@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
-http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+<mule xmlns:cep="http://www.mulesoft.org/schema/mule/cep" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/cep http://www.mulesoft.org/schema/mule/cep/current/mule-cep.xsd">
     <http:listener-config name="cep-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8081">
-        </http:listener-connection>
+        <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:1.0.7:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" keepApiBaseUri="true"/>
+    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:1.0.8:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" keepApiBaseUri="true" />
     <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="28cec497-7eaa-4a75-ab11-ed513e86f169">
         <http:request-connection host="viacep.com.br" />
     </http:request-config>
+    <db:config name="Database_Config" doc:name="Database Config" doc:id="3bcca65d-f3c5-4e11-b91d-006ce23201c5">
+        <db:generic-connection url="jdbc:postgresql://hh-pgsql-public.ebi.ac.uk:5432/pfmegrnargs" driverClassName="org.postgresql.Driver" user="reader" password="NWDMCE5xdipIjRrp" />
+    </db:config>
+	<cep:config name="Cep_Config" doc:name="Cep Config" doc:id="35eaf9f5-ad91-4833-824f-4a60949c27d2"/>
 	<flow name="cep-main">
         <http:listener config-ref="cep-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -140,24 +143,55 @@ output application/json
         </http:listener>
         <set-variable variableName="cep" value="#[attributes.queryParams.cep]" />
         <logger level="INFO" message="CEP Consultado: #[vars.cep]" />
+        <try doc:name="Try Conexao DB">
+            <db:select doc:name="Select" doc:id="9598e957-8fab-4347-8b12-cfc5b2c06b69" config-ref="Database_Config">
+                <db:sql><![CDATA[SELECT 1]]></db:sql>
+            </db:select>
+            <set-variable value="Conexao ao banco com sucesso OK" variableName="conexao" doc:name="sucesso" />
+            <error-handler>
+                <on-error-continue enableNotifications="true" logException="true" doc:name="Erro na conexão">
+                    <set-variable value="Conexao ao banco Falhou" variableName="conexao" doc:name="falha" />
+                </on-error-continue>
+            </error-handler>
+        </try>
+        <logger level="INFO" message="Resultado da conexão: #[vars.conexao]" doc:name="Log Resultado" />
         <http:request method="GET" doc:name="Request" doc:id="fa0536cb-83fc-430f-ab7c-2b778f63865b" config-ref="HTTP_Request_configuration" url="#['http://viacep.com.br/ws/' ++ vars.cep ++ '/json']" />
         <ee:transform doc:name="Transform Message" doc:id="d30cb99c-5e46-41e7-a89b-93ed21aea67f">
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-  cep: payload.cep,
-  logradouro: payload.logradouro,
-  complemento: payload.complemento,
-  bairro: payload.bairro,
-  localidade: payload.localidade,
-  uf: payload.uf,
-  estado: payload.estado,
-  regiao: payload.regiao,
-  ddd: payload.ddd
-}]]></ee:set-payload>
+[
+	{
+	  cep: payload.cep,
+	  logradouro: payload.logradouro,
+	  complemento: payload.complemento,
+	  bairro: payload.bairro,
+	  localidade: payload.localidade,
+	  uf: payload.uf,
+	  estado: payload.estado,
+	  regiao: payload.regiao,
+	  ddd: payload.ddd
+	
+	},
+	{
+	  statusDataBase: vars.conexao
+	}
+]]]></ee:set-payload>
             </ee:message>
         </ee:transform>
+    </flow>
+    <flow name="get:\connector\(cep):cep-config">
+        <http:listener config-ref="cep-httpListenerConfig" path="/connector/{cep}">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <cep:cep doc:name="CEP" doc:id="737fabf6-26b8-4e6e-8339-a8e4e1820b73" cep="#[attributes.uriParams.cep]" client-id="#[attributes.headers.'client_id']" client-secret="#[attributes.headers.'client_secret']" config-ref="Cep_Config"/>
+		<logger level="INFO" message="get:\connector\(cep):cep-config" />
     </flow>
 </mule>
