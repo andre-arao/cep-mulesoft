@@ -1,0 +1,31 @@
+#%RAML 1.0
+title: cep
+baseUri: https://cep-application-68dqzx.5sc6y6-3.usa-e2.cloudhub.io/api
+
+/cep:
+  get:
+    displayName: 
+    headers:
+      client_id:
+        type: string
+        example: "8591bbef7a1e4f27b4997bb02bac2230"
+      client_secret:
+        type: string
+        example: "D7115eF1f8D3413E9e4c13327840632D"
+    queryParameters:
+      cep:
+        type: string
+        example: "05001200"
+    description: Handle CORS preflight request
+    responses:
+      200:
+        headers:
+          Access-Control-Allow-Origin:
+            example: "*"
+          Access-Control-Allow-Methods:
+            example: "GET, POST, PUT, DELETE, OPTIONS"
+          Access-Control-Allow-Headers:
+            example: "Content-Type, Authorization"
+        body:
+          application/json:
+            type: array

@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="retornoSimples" format="json">
+      <types:shape format="weave" example="examples/retornoSimples.json"><![CDATA[%dw 2.0
+
+type retornoSimples = {|
+  cep: String, 
+  logradouro: String, 
+  complemento: String, 
+  unidade: String, 
+  bairro: String, 
+  localidade: String, 
+  uf: String, 
+  estado: String, 
+  regiao: String, 
+  ibge: String, 
+  gia: String, 
+  ddd: String, 
+  siafi: String
+|} {"example": "{\\\"cep\\\":\\\"05001-200\\\",\\\"logradouro\\\":\\\"Avenida Francisco Matarazzo\\\",\\\"complemento\\\":\\\"de 1701\\/1702 ao fim\\\",\\\"unidade\\\":\\\"\\\",\\\"bairro\\\":\\\"\u00C1gua Branca\\\",\\\"localidade\\\":\\\"S\u00E3o Paulo\\\",\\\"uf\\\":\\\"SP\\\",\\\"estado\\\":\\\"S\u00E3o Paulo\\\",\\\"regiao\\\":\\\"Sudeste\\\",\\\"ibge\\\":\\\"3550308\\\",\\\"gia\\\":\\\"1004\\\",\\\"ddd\\\":\\\"11\\\",\\\"siafi\\\":\\\"7107\\\"}"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#d30cb99c-5e46-41e7-a89b-93ed21aea67f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="retornoSimples"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
