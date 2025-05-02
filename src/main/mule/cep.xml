@@ -4,7 +4,7 @@ http://www.mulesoft.org/schema/mule/cep http://www.mulesoft.org/schema/mule/cep/
     <http:listener-config name="cep-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:1.0.8:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" keepApiBaseUri="true" />
+    <apikit:config name="cep-config" api="resource::f620cd3f-ecbe-4243-8cc4-5987fce06501:cep:${EXCHANGE_VERSION:1.0.8}:raml:zip:cep.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" keepApiBaseUri="true" />
     <http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="28cec497-7eaa-4a75-ab11-ed513e86f169">
         <http:request-connection host="viacep.com.br" />
     </http:request-config>
